@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Final Surprise 🎁❤️</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { overflow: hidden; }
+
+    /* ── Page layout ──────────────────────────────────────── */
+    .surprise-page {
+      position: relative; z-index: 10;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 30px 20px 120px; gap: 20px;
+    }
+
+    /* ── Intro messages ───────────────────────────────────── */
+    .intro-msg {
+      font-family: var(--font-script);
+      font-size: clamp(1.8rem, 5vw, 3.5rem);
+      color: var(--text-soft);
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .intro-msg.show { opacity: 1; transform: translateY(0); }
+    .intro-msg.hide { opacity: 0; transform: translateY(-16px); }
+
+    /* ── Gift Box ─────────────────────────────────────────── */
+    #gift-section {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+
+    #gift-section.show { display: flex; }
+
+    .gift-wrap {
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .gift-box {
+      font-size: clamp(7rem, 18vw, 12rem);
+      display: block;
+      animation: giftFloat 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 30px rgba(255,215,0,0.5))
+              drop-shadow(0 0 60px rgba(255,215,0,0.25));
+      transition: all 0.3s;
+    }
+
+    @keyframes giftFloat {
+      0%,100% { transform: translateY(0) rotate(-2deg); }
+      50%      { transform: translateY(-14px) rotate(2deg); }
+    }
+
+    /* shaking state */
+    .gift-box.shaking {
+      animation: giftShake 0.1s ease-in-out infinite;
+    }
+
+    @keyframes giftShake {
+      0%,100% { transform: translateX(0); }
+      25%     { transform: translateX(-6px) rotate(-3deg); }
+      75%     { transform: translateX(6px)  rotate(3deg); }
+    }
+
+    .gift-hint {
+      font-size: 0.9rem;
+      color: rgba(255,200,220,0.7);
+      animation: hintPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes hintPulse {
+      0%,100% { opacity: 0.5; }
+      50%      { opacity: 1; }
+    }
+
+    /* ── Opened reveal ────────────────────────────────────── */
+    #reveal-section {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      max-width: 680px;
+    }
+
+    #reveal-section.show { display: flex; }
+
+    .reveal-title {
+      font-family: var(--font-script);
+      font-size: clamp(2rem, 6vw, 4.5rem);
+      color: var(--gold-soft);
+      text-align: center;
+      text-shadow: 0 0 40px rgba(255,215,0,0.8),
+                   0 0 80px rgba(255,215,0,0.4);
+      animation: goldGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes goldGlow {
+      0%,100% { text-shadow: 0 0 30px rgba(255,215,0,0.7), 0 0 60px rgba(255,215,0,0.3); }
+      50%      { text-shadow: 0 0 60px rgba(255,215,0,1),   0 0 120px rgba(255,215,0,0.6); }
+    }
+
+    .reveal-text {
+      font-family: var(--font-elegant);
+      font-size: clamp(1rem, 2.2vw, 1.25rem);
+      color: rgba(255,220,235,0.9);
+      line-height: 1.9;
+      font-style: italic;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: all 0.9s ease;
+    }
+
+    .reveal-text.show { opacity: 1; transform: translateY(0); }
+
+    .love-sign {
+      font-family: var(--font-script);
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      color: var(--rose-light);
+      text-align: center;
+      opacity: 0;
+      animation: none;
+      text-shadow: 0 0 40px rgba(255,107,157,0.9);
+      transition: opacity 0.8s ease;
+    }
+
+    .love-sign.show {
+      opacity: 1;
+      animation: heartbeat 1.2s ease-in-out infinite;
+    }
+
+    /* Light burst from gift */
+    #light-burst {
+      position: fixed; inset: 0;
+      background: radial-gradient(circle at center, rgba(255,215,0,0.95), rgba(255,107,157,0.5), transparent);
+      z-index: 8000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    #light-burst.flash {
+      animation: lightFlash 1.2s ease-out forwards;
+    }
+
+    @keyframes lightFlash {
+      0%   { opacity: 0; }
+      15%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
+
+    /* Fireworks canvas */
+    #fw-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 5;
+      width: 100%; height: 100%;
+    }
+  </style>
+</head>
+<body class="bg-romantic">
+
+  <canvas id="particle-canvas" class="canvas-layer"></canvas>
+  <canvas id="fw-canvas"></canvas>
+  <div id="light-burst"></div>
+  <div class="hearts-container"></div>
+  <div class="petals-container"></div>
+  <div id="page-transition"></div>
+  <button id="music-btn" class="music-btn">🎵</button>
+
+  <div class="nav-container">
+    <a class="nav-btn" onclick="navigateTo('wishes.html')">💗 Go Back</a>
+    <div class="page-dots">
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot active"></div>
+      <div class="page-dot"></div>
+    </div>
+    <a class="nav-btn" id="final-nav" style="display:none" onclick="navigateTo('final.html')">Last Page ❤️</a>
+  </div>
+
+  <main class="surprise-page">
+    <!-- Phase 1: Intro lines -->
+    <div id="intro-phase">
+      <p class="intro-msg" id="im1">Wait...</p>
+      <p class="intro-msg" id="im2" style="font-size:clamp(1.2rem,3vw,2rem); margin-top:10px;">I saved something special for the end. ❤️</p>
+    </div>
+
+    <!-- Phase 2: Gift box -->
+    <div id="gift-section">
+      <div class="gift-wrap" onclick="openGift()">
+        <span class="gift-box" id="gift-box">🎁</span>
+      </div>
+      <p class="gift-hint">Click to open your surprise! 🎀</p>
+      <button class="btn-primary" onclick="openGift()">Open It 🎁</button>
+    </div>
+
+    <!-- Phase 3: Final reveal -->
+    <div id="reveal-section">
+      <h1 class="reveal-title">Happy Birthday, Sister! ❤️🎂</h1>
+
+      <p class="reveal-text" id="rv1">
+        No matter how much we grow,<br>
+        no matter where life takes us,<br>
+        you'll always be my sister,<br>
+        my family,<br>
+        and someone I'll always love.
+      </p>
+
+      <p class="love-sign" id="rv2">LOVE YOU ALWAYS ❤️</p>
+    </div>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+  <script>
+    initParticleCanvas('particle-canvas');
+
+    const fwCanvas = document.getElementById('fw-canvas');
+    fwCanvas.width  = window.innerWidth;
+    fwCanvas.height = window.innerHeight;
+    window.addEventListener('resize', () => {
+      fwCanvas.width  = window.innerWidth;
+      fwCanvas.height = window.innerHeight;
+    });
+
+    // ── Intro sequence ─────────────────────────────────────────
+    const im1 = document.getElementById('im1');
+    const im2 = document.getElementById('im2');
+
+    setTimeout(() => im1.classList.add('show'), 400);
+    setTimeout(() => im2.classList.add('show'), 1600);
+    setTimeout(() => {
+      // hide intro, show gift
+      im1.classList.add('hide');
+      im2.classList.add('hide');
+      setTimeout(() => {
+        document.getElementById('intro-phase').style.display = 'none';
+        const gs = document.getElementById('gift-section');
+        gs.classList.add('show');
+        gs.style.animation = 'none';
+        gs.style.opacity = '0';
+        gs.style.transform = 'scale(0.8)';
+        requestAnimationFrame(() => {
+          gs.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
+          gs.style.opacity = '1';
+          gs.style.transform = 'scale(1)';
+        });
+      }, 500);
+    }, 3500);
+
+    // ── Gift open sequence ─────────────────────────────────────
+    let giftOpened = false;
+    function openGift() {
+      if (giftOpened) return;
+      giftOpened = true;
+
+      const giftBox = document.getElementById('gift-box');
+
+      // Phase 1: shake
+      giftBox.classList.add('shaking');
+
+      setTimeout(() => {
+        // Phase 2: light burst
+        giftBox.textContent = '✨';
+        giftBox.classList.remove('shaking');
+        const burst = document.getElementById('light-burst');
+        burst.classList.add('flash');
+
+        // Massive heart burst
+        for (let i = 0; i < 5; i++) {
+          setTimeout(() => burstHearts(window.innerWidth/2, window.innerHeight/2, 20), i * 150);
+        }
+
+        // Confetti
+        launchConfetti(150);
+
+        // Fireworks
+        let fwCount = 0;
+        const fwInt = setInterval(() => {
+          const ctx = fwCanvas.getContext('2d');
+          ctx.fillStyle = 'rgba(0,0,0,0.1)';
+          ctx.fillRect(0, 0, fwCanvas.width, fwCanvas.height);
+          launchFirework(fwCanvas);
+          launchFirework(fwCanvas);
+          if (++fwCount > 25) clearInterval(fwInt);
+        }, 400);
+
+        // Rose petals intensify
+        for (let i = 0; i < 20; i++) {
+          setTimeout(() => {
+            const p = document.createElement('span');
+            p.className = 'petal';
+            p.textContent = ['🌹','🌸','🌷','🌺'][Math.floor(Math.random()*4)];
+            p.style.cssText = `
+              left:${Math.random()*100}%; top:-30px;
+              font-size:${1 + Math.random()}rem;
+              animation-duration:${5 + Math.random()*5}s;
+            `;
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 11000);
+          }, i * 200);
+        }
+
+        // Show reveal section
+        setTimeout(() => {
+          document.getElementById('gift-section').style.display = 'none';
+          const rs = document.getElementById('reveal-section');
+          rs.classList.add('show');
+          rs.style.opacity = '0';
+          rs.style.transform = 'scale(0.9)';
+          requestAnimationFrame(() => {
+            rs.style.transition = 'opacity 1s ease, transform 1s ease';
+            rs.style.opacity = '1';
+            rs.style.transform = 'scale(1)';
+          });
+          setTimeout(() => document.getElementById('rv1').classList.add('show'), 1000);
+          setTimeout(() => document.getElementById('rv2').classList.add('show'), 2500);
+          setTimeout(() => {
+            document.getElementById('final-nav').style.display = 'inline-flex';
+          }, 4000);
+        }, 1200);
+
+      }, 800);
+    }
+  </script>
+</body>
+</html>

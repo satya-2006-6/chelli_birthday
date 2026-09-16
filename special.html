@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Why You're So Special 🌹</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { overflow-x: hidden; }
+
+    .special-page {
+      position: relative; z-index: 10;
+      min-height: 100vh;
+      padding: 80px 24px 160px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 48px;
+    }
+
+    .page-title {
+      font-family: var(--font-script);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: var(--pink-soft);
+      text-align: center;
+      text-shadow: 0 0 30px rgba(255,107,157,0.6);
+    }
+
+    /* ── Cards Grid ─────────────────────────────────────── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 28px;
+      max-width: 1000px;
+      width: 100%;
+    }
+
+    .special-card {
+      position: relative;
+      padding: 44px 32px 36px;
+      border-radius: 24px;
+      text-align: center;
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 8px 40px rgba(192,24,74,0.1),
+                  inset 0 1px 0 rgba(255,255,255,0.1);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(40px) scale(0.96);
+      transition: all 0.7s cubic-bezier(.34,1.56,.64,1);
+      cursor: default;
+    }
+
+    .special-card.visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    /* Individual card accent colors */
+    .special-card:nth-child(1) { --card-color: #ff6b9d; }
+    .special-card:nth-child(2) { --card-color: #e84393; }
+    .special-card:nth-child(3) { --card-color: #a855f7; }
+    .special-card:nth-child(4) { --card-color: #fbbf24; }
+
+    .special-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--card-color), transparent);
+    }
+
+    .special-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 50% 0%,
+        rgba(255,107,157,0.08) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Card glow on hover */
+    .special-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 60px rgba(192,24,74,0.25),
+                  0 0 40px rgba(var(--card-color), 0.2);
+      border-color: var(--card-color, rgba(255,150,180,0.4));
+    }
+
+    .card-icon {
+      font-size: 3.5rem;
+      display: block;
+      margin-bottom: 16px;
+      animation: iconFloat 3s ease-in-out infinite;
+    }
+
+    .special-card:nth-child(1) .card-icon { animation-delay: 0.0s; }
+    .special-card:nth-child(2) .card-icon { animation-delay: 0.5s; }
+    .special-card:nth-child(3) .card-icon { animation-delay: 1.0s; }
+    .special-card:nth-child(4) .card-icon { animation-delay: 1.5s; }
+
+    @keyframes iconFloat {
+      0%,100% { transform: translateY(0) rotate(-3deg); }
+      50%      { transform: translateY(-10px) rotate(3deg); }
+    }
+
+    .card-title {
+      font-family: var(--font-head);
+      font-size: 1.4rem;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+
+    .card-text {
+      font-family: var(--font-elegant);
+      font-size: 1.05rem;
+      color: var(--text-soft);
+      line-height: 1.7;
+      font-style: italic;
+    }
+
+    /* Floating hearts around cards */
+    .card-heart {
+      position: absolute;
+      pointer-events: none;
+      font-size: 1rem;
+      opacity: 0;
+      animation: cardHeartFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes cardHeartFloat {
+      0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+      30%  { opacity: 0.7; }
+      70%  { opacity: 0.4; }
+      100% { opacity: 0; transform: translateY(-80px) scale(1.2); }
+    }
+
+    /* ── Bottom Quote ─────────────────────────────────── */
+    .bottom-quote {
+      font-family: var(--font-script);
+      font-size: clamp(1.3rem, 3.5vw, 2.2rem);
+      color: var(--gold-soft);
+      text-align: center;
+      text-shadow: 0 0 20px rgba(255,215,0,0.5);
+      max-width: 600px;
+      line-height: 1.5;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.9s ease;
+    }
+
+    .bottom-quote.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body class="bg-romantic">
+
+  <canvas id="particle-canvas" class="canvas-layer"></canvas>
+  <div class="hearts-container"></div>
+  <div class="petals-container"></div>
+  <div id="page-transition"></div>
+  <button id="music-btn" class="music-btn">🎵</button>
+
+  <div class="nav-container">
+    <a class="nav-btn" onclick="navigateTo('memories.html')">💗 Go Back</a>
+    <div class="page-dots">
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot active"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+    </div>
+    <a class="nav-btn" onclick="navigateTo('wishes.html')">One More Thing... 💌</a>
+  </div>
+
+  <main class="special-page">
+    <h1 class="page-title fade-up">Why You're So Special ❤️</h1>
+
+    <div class="cards-grid" id="cards-grid">
+
+      <div class="special-card" data-delay="0">
+        <!-- floating micro-hearts -->
+        <span class="card-heart" style="left:10%;  top:30%; animation-delay:0.0s;">❤️</span>
+        <span class="card-heart" style="left:80%;  top:60%; animation-delay:1.5s;">🩷</span>
+        <span class="card-heart" style="left:50%;  top:80%; animation-delay:3.0s;">💕</span>
+
+        <span class="card-icon">😊</span>
+        <h2 class="card-title">Your Smile</h2>
+        <p class="card-text">Because your smile can make even an ordinary day better.</p>
+      </div>
+
+      <div class="special-card" data-delay="150">
+        <span class="card-heart" style="left:15%;  top:20%; animation-delay:0.8s;">💗</span>
+        <span class="card-heart" style="left:75%;  top:50%; animation-delay:2.0s;">❤️</span>
+        <span class="card-heart" style="left:40%;  top:75%; animation-delay:3.5s;">🌹</span>
+
+        <span class="card-icon">❤️</span>
+        <h2 class="card-title">Your Heart</h2>
+        <p class="card-text">Because you care more than you sometimes show.</p>
+      </div>
+
+      <div class="special-card" data-delay="300">
+        <span class="card-heart" style="left:20%;  top:25%; animation-delay:1.2s;">✨</span>
+        <span class="card-heart" style="left:70%;  top:55%; animation-delay:0.4s;">💫</span>
+        <span class="card-heart" style="left:45%;  top:78%; animation-delay:2.8s;">⭐</span>
+
+        <span class="card-icon">✨</span>
+        <h2 class="card-title">Your Strength</h2>
+        <p class="card-text">Because you keep going even when things aren't easy.</p>
+      </div>
+
+      <div class="special-card" data-delay="450">
+        <span class="card-heart" style="left:12%;  top:35%; animation-delay:1.8s;">🌸</span>
+        <span class="card-heart" style="left:78%;  top:45%; animation-delay:0.9s;">💖</span>
+        <span class="card-heart" style="left:55%;  top:70%; animation-delay:3.2s;">🌷</span>
+
+        <span class="card-icon">🌸</span>
+        <h2 class="card-title">Simply You</h2>
+        <p class="card-text">Because you don't need to be anyone else to be special.</p>
+      </div>
+
+    </div>
+
+    <p class="bottom-quote" id="bottom-quote">
+      "You are the kind of person the world is lucky to have." ❤️
+    </p>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+  <script>
+    initParticleCanvas('particle-canvas');
+
+    // Staggered card entrance
+    const cards = document.querySelectorAll('.special-card');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const delay = parseInt(e.target.dataset.delay || 0);
+          setTimeout(() => {
+            e.target.classList.add('visible');
+            // spawn micro hearts
+            e.target.querySelectorAll('.card-heart').forEach(h => {
+              h.style.opacity = '1';
+            });
+          }, delay);
+        }
+      });
+    }, { threshold: 0.2 });
+
+    cards.forEach(c => observer.observe(c));
+
+    // Quote appears after cards
+    setTimeout(() => {
+      const q = document.getElementById('bottom-quote');
+      const qObs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+      }, { threshold: 0.3 });
+      qObs.observe(q);
+    }, 500);
+
+    // Hover: burst hearts from card
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        const rect = card.getBoundingClientRect();
+        burstHearts(rect.left + rect.width/2, rect.top + rect.height/2, 8);
+      });
+    });
+  </script>
+</body>
+</html>

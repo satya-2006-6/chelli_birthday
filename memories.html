@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Memories 📸❤️</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { overflow-x: hidden; }
+
+    .memories-page {
+      position: relative; z-index: 10;
+      min-height: 100vh;
+      padding: 80px 24px 160px;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 40px;
+    }
+
+    .page-title {
+      font-family: var(--font-script);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: var(--pink-soft);
+      text-align: center;
+      text-shadow: 0 0 30px rgba(255,107,157,0.6);
+    }
+
+    .page-sub {
+      font-family: var(--font-elegant);
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--text-soft);
+      font-style: italic;
+      text-align: center;
+      margin-top: -20px;
+    }
+
+    /* ── Photo Grid ─────────────────────────────────────────── */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    .photo-card {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid rgba(255,150,180,0.25);
+      box-shadow: 0 8px 32px rgba(192,24,74,0.15),
+                  0 0 0 1px rgba(255,255,255,0.05);
+      animation: photoFloat ease-in-out infinite;
+      transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+    }
+
+    .photo-card:nth-child(1) { animation-duration: 5.0s; }
+    .photo-card:nth-child(2) { animation-duration: 5.5s; animation-delay: 0.5s; }
+    .photo-card:nth-child(3) { animation-duration: 4.8s; animation-delay: 1.0s; }
+    .photo-card:nth-child(4) { animation-duration: 5.2s; animation-delay: 0.3s; }
+    .photo-card:nth-child(5) { animation-duration: 5.7s; animation-delay: 0.8s; }
+    .photo-card:nth-child(6) { animation-duration: 4.6s; animation-delay: 0.2s; }
+    .photo-card:nth-child(7) { animation-duration: 5.4s; animation-delay: 0.7s; }
+    .photo-card:nth-child(8) { animation-duration: 5.1s; animation-delay: 0.4s; }
+
+    @keyframes photoFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+
+    .photo-card:hover {
+      transform: translateY(-12px) scale(1.03) !important;
+      box-shadow: 0 20px 60px rgba(192,24,74,0.4),
+                  0 0 40px rgba(255,107,157,0.3);
+      border-color: rgba(255,107,157,0.6);
+      animation-play-state: paused;
+    }
+
+    /* Photo placeholder / actual image */
+    .photo-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      display: block;
+      background: linear-gradient(135deg,
+        rgba(192,24,74,0.3) 0%,
+        rgba(124,58,237,0.25) 50%,
+        rgba(192,24,74,0.2) 100%);
+    }
+
+    /* Placeholder text when no real photo */
+    .photo-placeholder {
+      width: 100%;
+      height: 220px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg,
+        rgba(192,24,74,0.25),
+        rgba(124,58,237,0.2));
+      color: rgba(255,200,220,0.7);
+      font-size: 3rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .photo-placeholder:hover {
+      background: linear-gradient(135deg,
+        rgba(192,24,74,0.4),
+        rgba(124,58,237,0.35));
+    }
+
+    .photo-placeholder-txt {
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      text-align: center;
+      padding: 0 12px;
+      opacity: 0.7;
+    }
+
+    /* Caption bar */
+    .photo-caption {
+      background: linear-gradient(to top, rgba(0,0,0,0.75), transparent);
+      color: #fff;
+      font-family: var(--font-elegant);
+      font-size: 1rem;
+      font-style: italic;
+      padding: 20px 14px 14px;
+      text-align: center;
+    }
+
+    /* ── Lightbox ─────────────────────────────────────────── */
+    #lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 9000;
+      display: none;
+      align-items: center; justify-content: center;
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+
+    #lightbox.open { display: flex; }
+
+    #lightbox img {
+      max-width: 90vw;
+      max-height: 75vh;
+      border-radius: 16px;
+      box-shadow: 0 0 80px rgba(255,107,157,0.4);
+      border: 1px solid rgba(255,150,180,0.3);
+      object-fit: contain;
+    }
+
+    #lightbox .lb-caption {
+      font-family: var(--font-script);
+      font-size: 1.6rem;
+      color: var(--pink-soft);
+      text-align: center;
+      text-shadow: 0 0 20px rgba(255,107,157,0.6);
+    }
+
+    #lightbox .lb-close {
+      position: absolute;
+      top: 20px; right: 24px;
+      font-size: 1.8rem;
+      color: rgba(255,200,220,0.8);
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+
+    #lightbox .lb-close:hover { transform: scale(1.2) rotate(90deg); }
+
+    /* No photo lightbox style */
+    .lb-placeholder {
+      font-size: 6rem;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="bg-romantic">
+
+  <canvas id="particle-canvas" class="canvas-layer"></canvas>
+  <div class="hearts-container"></div>
+  <div class="petals-container"></div>
+  <div id="page-transition"></div>
+  <button id="music-btn" class="music-btn">🎵</button>
+
+  <!-- Lightbox -->
+  <div id="lightbox" onclick="closeLightbox()">
+    <span class="lb-close">✕</span>
+    <div id="lb-content"></div>
+    <p id="lb-caption" class="lb-caption"></p>
+  </div>
+
+  <div class="nav-container">
+    <a class="nav-btn" onclick="navigateTo('letter.html')">💗 Go Back</a>
+    <div class="page-dots">
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot active"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+    </div>
+    <a class="nav-btn" onclick="navigateTo('special.html')">There's More ❤️</a>
+  </div>
+
+  <main class="memories-page">
+    <h1 class="page-title fade-up">Moments I'll Always Treasure ❤️</h1>
+    <p class="page-sub fade-up">Click any photo to open it ✨</p>
+
+    <div class="photo-grid" id="photo-grid">
+      <!-- Generated by JS from config.js -->
+    </div>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+  <script>
+    initParticleCanvas('particle-canvas');
+
+    const DEFAULT_PHOTOS = [
+      { src: '', caption: 'Our crazy moments 😂❤️' },
+      { src: '', caption: 'Memories that never get old ✨' },
+      { src: '', caption: 'Forever partners in crime 😌' },
+      { src: '', caption: 'One picture, a thousand memories ❤️' },
+      { src: '', caption: 'Growing together ❤️' },
+      { src: '', caption: 'Always family. 🌸' },
+      { src: '', caption: 'Side by side always 💗' },
+      { src: '', caption: 'The best kind of chaos 😄❤️' },
+    ];
+
+    const photos = (CONFIG.PHOTOS && CONFIG.PHOTOS.length)
+      ? CONFIG.PHOTOS
+      : DEFAULT_PHOTOS;
+
+    const PLACEHOLDER_ICONS = ['📸','🌸','❤️','✨','🌹','💗','🎀','💫'];
+
+    const grid = document.getElementById('photo-grid');
+
+    photos.forEach((photo, idx) => {
+      const card = document.createElement('div');
+      card.className = 'photo-card fade-up';
+      card.onclick = () => openLightbox(photo.src, photo.caption, idx);
+
+      if (photo.src) {
+        // Real photo
+        card.innerHTML = `
+          <img src="${photo.src}" alt="${photo.caption}" class="photo-img"
+               onerror="this.parentElement.querySelector('.photo-placeholder') && 0;
+                        this.style.display='none';
+                        this.nextElementSibling && (this.nextElementSibling.style.display='flex');">
+          <div class="photo-caption">${photo.caption}</div>
+        `;
+      } else {
+        // Placeholder
+        card.innerHTML = `
+          <div class="photo-placeholder">
+            ${PLACEHOLDER_ICONS[idx % PLACEHOLDER_ICONS.length]}
+            <span class="photo-placeholder-txt">Add your photo here ❤️<br><small>Edit PHOTOS in config.js</small></span>
+          </div>
+          <div class="photo-caption">${photo.caption}</div>
+        `;
+      }
+
+      grid.appendChild(card);
+    });
+
+    // Animate cards in with stagger
+    setTimeout(() => {
+      document.querySelectorAll('.photo-card').forEach((card, i) => {
+        setTimeout(() => card.classList.add('visible'), i * 120);
+      });
+    }, 300);
+
+    function openLightbox(src, caption, idx) {
+      const lb = document.getElementById('lightbox');
+      const content = document.getElementById('lb-content');
+      const cap = document.getElementById('lb-caption');
+
+      if (src) {
+        content.innerHTML = `<img src="${src}" alt="${caption}">`;
+      } else {
+        content.innerHTML = `
+          <div class="lb-placeholder">${PLACEHOLDER_ICONS[idx % PLACEHOLDER_ICONS.length]}</div>
+          <p style="color:rgba(255,200,220,0.7); font-size:0.9rem; text-align:center; margin-top:12px;">
+            Add your photo path in <strong>config.js</strong> → PHOTOS[${idx}].src
+          </p>
+        `;
+      }
+
+      cap.textContent = caption;
+      lb.classList.add('open');
+      burstHearts(window.innerWidth/2, window.innerHeight/2, 15);
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeLightbox();
+    });
+  </script>
+</body>
+</html>

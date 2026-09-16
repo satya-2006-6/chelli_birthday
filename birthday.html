@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday! 🎂❤️</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { overflow-x: hidden; }
+
+    /* ── Hero Section ─────────────────────────────────────── */
+    .birthday-hero {
+      position: relative; z-index: 10;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 30px 20px 120px;
+      gap: 16px;
+    }
+
+    .birthday-title {
+      font-family: var(--font-script);
+      font-size: clamp(2rem, 6vw, 4.2rem);
+      color: var(--pink-soft);
+      text-shadow: 0 0 30px rgba(255,107,157,0.7),
+                   0 0 60px rgba(255,107,157,0.4);
+      animation: titleGlow 3s ease-in-out infinite;
+      line-height: 1.3;
+    }
+
+    @keyframes titleGlow {
+      0%,100% { text-shadow: 0 0 20px rgba(255,107,157,0.7), 0 0 40px rgba(255,107,157,0.4); }
+      50%      { text-shadow: 0 0 40px rgba(255,107,157,1),   0 0 80px rgba(255,107,157,0.7), 0 0 120px rgba(255,107,157,0.3); }
+    }
+
+    .birthday-sub {
+      font-family: var(--font-elegant);
+      font-size: clamp(1rem, 2.5vw, 1.5rem);
+      color: var(--text-soft);
+      font-style: italic;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Cake ─────────────────────────────────────────────── */
+    .cake-section {
+      margin: 20px 0;
+      position: relative;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .cake-emoji {
+      font-size: clamp(6rem, 15vw, 10rem);
+      display: block;
+      animation: cakeFloat 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba(255,215,0,0.5))
+              drop-shadow(0 0 40px rgba(255,215,0,0.3));
+      transition: all 0.3s;
+    }
+
+    @keyframes cakeFloat {
+      0%,100% { transform: translateY(0) rotate(-2deg); }
+      50%      { transform: translateY(-12px) rotate(2deg); }
+    }
+
+    .cake-hint {
+      font-size: 0.85rem;
+      color: rgba(255,200,220,0.7);
+      margin-top: 8px;
+      animation: fadeInOut 2s ease-in-out infinite;
+    }
+
+    @keyframes fadeInOut {
+      0%,100% { opacity: 0.5; }
+      50%      { opacity: 1; }
+    }
+
+    /* Interactive cake state */
+    .cake-blown .cake-emoji {
+      animation: none;
+      filter: drop-shadow(0 0 30px rgba(255,215,0,0.8));
+    }
+
+    .wish-msg {
+      font-family: var(--font-script);
+      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      color: var(--gold-soft);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s ease;
+      margin-top: 16px;
+      text-shadow: 0 0 20px rgba(255,215,0,0.7);
+    }
+
+    .wish-msg.show { opacity: 1; transform: translateY(0); }
+
+    /* ── Fireworks canvas ─────────────────────────────────── */
+    #fw-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      width: 100%; height: 100%;
+    }
+
+    /* Candle ripple */
+    .candle-ripple {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: rgba(255,215,0,0.6);
+      animation: rippleOut 0.6s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes rippleOut {
+      to { width: 300px; height: 300px; opacity: 0; }
+    }
+
+    /* Smoke puff */
+    .smoke {
+      position: absolute;
+      font-size: 1.5rem;
+      animation: smokeDrift 2s ease-out forwards;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    @keyframes smokeDrift {
+      0%   { opacity: 0.8; transform: translateY(0) scale(0.5); }
+      100% { opacity: 0;   transform: translateY(-60px) scale(2); }
+    }
+
+    .cta-row {
+      display: flex; gap: 16px;
+      flex-wrap: wrap; justify-content: center;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body class="bg-romantic">
+
+  <canvas id="particle-canvas" class="canvas-layer"></canvas>
+  <canvas id="fw-canvas"></canvas>
+
+  <div class="hearts-container"></div>
+  <div class="petals-container"></div>
+  <div id="page-transition"></div>
+  <button id="music-btn" class="music-btn" title="Play Music">🎵</button>
+
+  <!-- Navigation dots -->
+  <div class="nav-container">
+    <a class="nav-btn" onclick="navigateTo('index.html')">💗 Go Back</a>
+    <div class="page-dots">
+      <div class="page-dot"></div>
+      <div class="page-dot active"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+    </div>
+    <a class="nav-btn" id="continue-btn" onclick="navigateTo('letter.html')" style="display:none">Continue ❤️</a>
+  </div>
+
+  <main class="birthday-hero">
+    <h1 class="birthday-title fade-up">Happy Birthday,<br>My Beautiful Sister ❤️</h1>
+    <p class="birthday-sub fade-up">Today is all about celebrating <em>you</em>.</p>
+
+    <div class="cake-section fade-up" id="cake-section" onclick="blowCandles(this)">
+      <span class="cake-emoji" id="cake-emoji">🎂</span>
+      <p class="cake-hint" id="cake-hint">Click to blow the candles! 🕯️</p>
+    </div>
+
+    <p class="wish-msg" id="wish-msg">Make a wish, birthday girl! ✨🌠</p>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+  <script>
+    initParticleCanvas('particle-canvas');
+
+    // ── Fireworks loop ────────────────────────────────────────
+    const fwCanvas = document.getElementById('fw-canvas');
+    fwCanvas.width  = window.innerWidth;
+    fwCanvas.height = window.innerHeight;
+    window.addEventListener('resize', () => {
+      fwCanvas.width  = window.innerWidth;
+      fwCanvas.height = window.innerHeight;
+    });
+
+    let fwInterval = null;
+
+    function startFireworks() {
+      if (fwInterval) return;
+      fwInterval = setInterval(() => {
+        const ctx = fwCanvas.getContext('2d');
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        ctx.fillRect(0, 0, fwCanvas.width, fwCanvas.height);
+        launchFirework(fwCanvas);
+      }, 700);
+    }
+
+    // soft background fireworks on page load
+    setTimeout(startFireworks, 1000);
+
+    // ── Blow candles interaction ──────────────────────────────
+    let blown = false;
+    function blowCandles(section) {
+      if (blown) return;
+      blown = true;
+
+      // Swap cake emoji
+      const cakeEl = document.getElementById('cake-emoji');
+      cakeEl.textContent = '🎂';
+      cakeEl.style.fontSize = 'clamp(7rem, 16vw, 11rem)';
+
+      // Smoke puffs
+      for (let i = 0; i < 6; i++) {
+        const smoke = document.createElement('span');
+        smoke.className = 'smoke';
+        smoke.textContent = '💨';
+        smoke.style.cssText = `
+          left:${40 + Math.random()*20}%;
+          top:${30 + Math.random()*10}%;
+          font-size:${1.2 + Math.random()}rem;
+          animation-delay:${i * 0.12}s;
+        `;
+        section.appendChild(smoke);
+        setTimeout(() => smoke.remove(), 2200);
+      }
+
+      // Ripple
+      const ripple = document.createElement('div');
+      ripple.className = 'candle-ripple';
+      section.style.position = 'relative';
+      section.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 700);
+
+      // Hide hint
+      document.getElementById('cake-hint').style.opacity = '0';
+
+      // Golden sparkles
+      for (let i = 0; i < 35; i++) {
+        setTimeout(() => {
+          const rect = section.getBoundingClientRect();
+          burstHearts(
+            rect.left + rect.width / 2 + (Math.random()-0.5)*100,
+            rect.top  + rect.height * 0.3,
+            3
+          );
+        }, i * 80);
+      }
+
+      // Confetti
+      setTimeout(() => launchConfetti(100), 400);
+
+      // Wish message
+      setTimeout(() => {
+        document.getElementById('wish-msg').classList.add('show');
+        document.getElementById('continue-btn').style.display = 'inline-flex';
+      }, 1200);
+    }
+  </script>
+</body>
+</html>

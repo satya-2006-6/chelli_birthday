@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Special Surprise For You 💌</title>
+  <meta name="description" content="A birthday surprise made with love, just for you.">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── Page 1 specific ─────────────────────────────── */
+    body { overflow: hidden; }
+
+    .hero {
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      min-height: 100vh;
+      padding: 20px;
+      gap: 0;
+    }
+
+    /* Central glow orb */
+    .glow-orb {
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(192,24,74,0.18) 0%,
+        rgba(124,58,237,0.08) 40%,
+        transparent 70%);
+      animation: orbPulse 4s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes orbPulse {
+      0%,100% { transform: scale(1);   opacity: 0.7; }
+      50%      { transform: scale(1.15); opacity: 1; }
+    }
+
+    /* Message lines */
+    .msg-line {
+      font-family: var(--font-script);
+      color: var(--text-bright);
+      text-align: center;
+      line-height: 1.4;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+      position: relative; z-index: 2;
+    }
+
+    .msg-line.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .msg-1 {
+      font-size: clamp(2.5rem, 7vw, 5rem);
+      font-weight: 400;
+      color: var(--pink-soft);
+    }
+
+    .msg-2 {
+      font-size: clamp(1.4rem, 4vw, 2.4rem);
+      font-weight: 400;
+      color: var(--text-soft);
+      margin-top: 10px;
+    }
+
+    .msg-3 {
+      font-size: clamp(1.1rem, 3vw, 1.8rem);
+      font-weight: 300;
+      color: rgba(255,200,220,0.8);
+      font-style: italic;
+      margin-top: 8px;
+    }
+
+    .msg-4 {
+      font-size: clamp(1.6rem, 5vw, 3rem);
+      font-weight: 700;
+      color: var(--gold-soft);
+      margin-top: 10px;
+    }
+
+    .cta-wrap {
+      margin-top: 48px;
+      position: relative; z-index: 2;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s ease 0.2s, transform 0.8s ease 0.2s;
+    }
+
+    .cta-wrap.show { opacity: 1; transform: translateY(0); }
+
+    .btn-open {
+      padding: 20px 52px;
+      font-size: 1.15rem;
+      letter-spacing: 0.08em;
+      position: relative;
+    }
+
+    .btn-open .btn-shine {
+      position: absolute;
+      inset: 0; border-radius: 50px;
+      background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.25) 50%, transparent 80%);
+      background-size: 200% 100%;
+      animation: shine 3s linear infinite;
+    }
+
+    @keyframes shine {
+      0%   { background-position: -200% 0; }
+      100% { background-position:  200% 0; }
+    }
+
+    /* Stars background */
+    .star {
+      position: fixed;
+      border-radius: 50%;
+      background: white;
+      animation: starTwinkle ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes starTwinkle {
+      0%,100% { opacity: 0.2; transform: scale(0.8); }
+      50%      { opacity: 1;   transform: scale(1.2); }
+    }
+  </style>
+</head>
+<body class="bg-romantic">
+
+  <!-- Stars -->
+  <div id="stars-container"></div>
+
+  <!-- Particle canvas -->
+  <canvas id="particle-canvas" class="canvas-layer"></canvas>
+
+  <!-- Floating hearts -->
+  <div class="hearts-container"></div>
+  <!-- Rose petals -->
+  <div class="petals-container"></div>
+
+  <!-- Page Transition Overlay -->
+  <div id="page-transition"></div>
+
+  <!-- Music Button -->
+  <button id="music-btn" class="music-btn" title="Play Music">🎵</button>
+
+  <!-- Hero Content -->
+  <main class="hero">
+    <div class="glow-orb"></div>
+
+    <p class="msg-line msg-1" id="m1">Hey... ❤️</p>
+    <p class="msg-line msg-2" id="m2">I made something special for you.</p>
+    <p class="msg-line msg-3" id="m3">Because today isn't just another day...</p>
+    <p class="msg-line msg-4" id="m4">It's YOUR day. 🎂✨</p>
+
+    <div class="cta-wrap" id="cta">
+      <button class="btn-primary btn-open" onclick="openSurprise(this)">
+        <span class="btn-shine"></span>
+        Open Your Surprise 💌
+      </button>
+    </div>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+  <script>
+    // ── Animate intro messages ─────────────────────────────
+    const msgs = [
+      { el: document.getElementById('m1'), delay: 400  },
+      { el: document.getElementById('m2'), delay: 2000 },
+      { el: document.getElementById('m3'), delay: 3800 },
+      { el: document.getElementById('m4'), delay: 5500 },
+    ];
+
+    msgs.forEach(({ el, delay }) => {
+      setTimeout(() => el.classList.add('show'), delay);
+    });
+
+    setTimeout(() => {
+      document.getElementById('cta').classList.add('show');
+    }, 7200);
+
+    // ── Spawn stars ─────────────────────────────────────────
+    const starsContainer = document.getElementById('stars-container');
+    for (let i = 0; i < 80; i++) {
+      const s = document.createElement('div');
+      s.className = 'star';
+      const size = 1 + Math.random() * 2.5;
+      s.style.cssText = `
+        width:${size}px; height:${size}px;
+        left:${Math.random()*100}%;
+        top:${Math.random()*100}%;
+        animation-duration:${2 + Math.random()*4}s;
+        animation-delay:${Math.random()*4}s;
+      `;
+      starsContainer.appendChild(s);
+    }
+
+    // ── Particle canvas ─────────────────────────────────────
+    initParticleCanvas('particle-canvas');
+
+    // ── Open surprise with burst ─────────────────────────────
+    function openSurprise(btn) {
+      btn.disabled = true;
+      btn.innerHTML = '✨ Opening... ✨';
+      burstHearts(window.innerWidth / 2, window.innerHeight / 2, 50);
+      setTimeout(() => navigateTo('birthday.html'), 900);
+    }
+  </script>
+</body>
+</html>

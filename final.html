@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Our Little Forever ❤️</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { overflow: hidden; }
+
+    /* ── Slow-moving ambient background ───────────────────── */
+    .final-bg {
+      position: fixed; inset: 0;
+      background:
+        radial-gradient(ellipse at 30% 20%, rgba(120,0,80,0.35) 0%, transparent 55%),
+        radial-gradient(ellipse at 70% 80%, rgba(60,0,100,0.35) 0%, transparent 55%),
+        radial-gradient(ellipse at 50% 50%, rgba(80,0,50,0.2)  0%, transparent 60%),
+        linear-gradient(160deg, #0a0010 0%, #150020 50%, #0a0010 100%);
+      animation: bgDrift 15s ease-in-out infinite alternate;
+    }
+
+    @keyframes bgDrift {
+      0%   { filter: hue-rotate(0deg)   brightness(1); }
+      100% { filter: hue-rotate(15deg)  brightness(1.05); }
+    }
+
+    /* ── Center stage ─────────────────────────────────────── */
+    .final-stage {
+      position: relative; z-index: 10;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; padding: 40px 24px;
+      gap: 0;
+    }
+
+    /* ── Poem lines ───────────────────────────────────────── */
+    .poem-line {
+      font-family: var(--font-script);
+      color: rgba(255,220,235,0.9);
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 1s ease, transform 1s ease;
+      line-height: 1.5;
+    }
+
+    .poem-line.show { opacity: 1; transform: translateY(0); }
+
+    .poem-line.lg  { font-size: clamp(1.4rem, 4vw, 2.8rem); }
+    .poem-line.md  { font-size: clamp(1.1rem, 3vw, 2rem); color: var(--text-soft); }
+    .poem-line.sm  { font-size: clamp(0.95rem, 2.5vw, 1.5rem); color: rgba(255,200,220,0.7); }
+    .poem-line.xl  { font-size: clamp(1.8rem, 5vw, 3.5rem); color: var(--pink-soft);
+                      text-shadow: 0 0 30px rgba(255,107,157,0.6); }
+    .poem-line.gold {
+      font-size: clamp(1.2rem, 3.5vw, 2.2rem);
+      color: rgba(255,215,0,0.85);
+      font-style: italic;
+    }
+
+    .poem-line.gap { margin-top: 24px; }
+    .poem-line.gap2{ margin-top: 48px; }
+
+    /* ── Big animated heart ───────────────────────────────── */
+    .final-heart {
+      font-size: clamp(4rem, 10vw, 7rem);
+      display: block;
+      animation: heartbeat 1.2s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba(255,60,100,0.8))
+              drop-shadow(0 0 40px rgba(255,60,100,0.5));
+      opacity: 0;
+      transition: opacity 1s ease;
+      margin-top: 24px;
+    }
+
+    .final-heart.show { opacity: 1; }
+
+    /* ── Restart button ───────────────────────────────────── */
+    .restart-wrap {
+      margin-top: 40px;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+
+    .restart-wrap.show { opacity: 1; }
+
+    /* ── Stars canvas ─────────────────────────────────────── */
+    #star-canvas {
+      position: fixed; inset: 0;
+      pointer-events: none; z-index: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="final-bg"></div>
+
+  <canvas id="star-canvas"></canvas>
+  <canvas id="particle-canvas" class="canvas-layer" style="z-index:1;"></canvas>
+  <div class="hearts-container"></div>
+  <div class="petals-container"></div>
+  <div id="page-transition"></div>
+  <button id="music-btn" class="music-btn">🎵</button>
+
+  <div class="nav-container">
+    <a class="nav-btn" onclick="navigateTo('surprise.html')">💗 Go Back</a>
+    <div class="page-dots">
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot active"></div>
+    </div>
+  </div>
+
+  <main class="final-stage">
+
+    <p class="poem-line md"         id="l1">Some people come into our lives...</p>
+    <p class="poem-line sm gap"     id="l2">...and become memories.</p>
+    <p class="poem-line lg gap2"    id="l3">But sisters...</p>
+    <p class="poem-line xl gap"     id="l4">...become a part of our forever. ❤️</p>
+
+    <p class="poem-line lg gap2"    id="l5">Happy Birthday, Sis. ❤️</p>
+    <p class="poem-line gold gap"   id="l6">Made with all my love.</p>
+
+    <span class="final-heart"       id="final-heart">❤️</span>
+
+    <div class="restart-wrap"       id="restart-wrap">
+      <button class="btn-primary" onclick="navigateTo('index.html')">
+        🔁 From the Beginning
+      </button>
+    </div>
+
+  </main>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+  <script>
+    initParticleCanvas('particle-canvas');
+
+    // ── Starfield ──────────────────────────────────────────────
+    const sc = document.getElementById('star-canvas');
+    const sCtx = sc.getContext('2d');
+    let SW = sc.width = window.innerWidth;
+    let SH = sc.height = window.innerHeight;
+    window.addEventListener('resize', () => { SW = sc.width = window.innerWidth; SH = sc.height = window.innerHeight; });
+
+    const stars = Array.from({ length: 200 }, () => ({
+      x: Math.random() * 2000, y: Math.random() * 2000,
+      r: 0.3 + Math.random() * 1.8,
+      alpha: Math.random(),
+      dA: (Math.random() - 0.5) * 0.012,
+    }));
+
+    function drawStars() {
+      sCtx.clearRect(0, 0, SW, SH);
+      stars.forEach(s => {
+        sCtx.beginPath();
+        sCtx.arc(s.x % SW, s.y % SH, s.r, 0, Math.PI * 2);
+        sCtx.fillStyle = `rgba(255,220,240,${Math.max(0.05, Math.min(1, s.alpha))})`;
+        sCtx.fill();
+        s.alpha += s.dA;
+        if (s.alpha > 1 || s.alpha < 0.05) s.dA *= -1;
+      });
+      requestAnimationFrame(drawStars);
+    }
+    drawStars();
+
+    // ── Poem reveal sequence ───────────────────────────────────
+    const lines = [
+      { id: 'l1', t: 800  },
+      { id: 'l2', t: 2400 },
+      { id: 'l3', t: 4200 },
+      { id: 'l4', t: 5600 },
+      { id: 'l5', t: 7800 },
+      { id: 'l6', t: 9200 },
+    ];
+
+    lines.forEach(({ id, t }) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('show');
+      }, t);
+    });
+
+    // Heart
+    setTimeout(() => {
+      document.getElementById('final-heart').classList.add('show');
+      burstHearts(window.innerWidth/2, window.innerHeight*0.72, 30);
+    }, 10800);
+
+    // Restart button
+    setTimeout(() => {
+      document.getElementById('restart-wrap').classList.add('show');
+    }, 12500);
+  </script>
+</body>
+</html>

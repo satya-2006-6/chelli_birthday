@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Wishes For You panda✨</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      overflow-x: hidden;
+    }
+
+    /* ── Starfield background ─────────────────────────────── */
+    #star-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .wishes-page {
+      position: relative;
+      z-index: 10;
+      min-height: 100vh;
+      padding: 80px 24px 160px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .page-title {
+      font-family: var(--font-script);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: var(--pink-soft);
+      text-align: center;
+      text-shadow: 0 0 30px rgba(255, 107, 157, 0.6);
+    }
+
+    /* ── Wishes list ──────────────────────────────────────── */
+    .wishes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .wish-item {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 28px 36px;
+      border-radius: 20px;
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 8px 32px rgba(192, 24, 74, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      opacity: 0;
+      transform: translateX(-40px);
+      transition: all 0.7s cubic-bezier(.34, 1.4, .64, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wish-item.visible {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .wish-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, var(--rose), var(--purple));
+      border-radius: 3px 0 0 3px;
+    }
+
+    /* shimmer on hover */
+    .wish-item::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.05) 50%, transparent 70%);
+      background-size: 200%;
+      background-position: -200%;
+      transition: background-position 0.6s ease;
+      pointer-events: none;
+    }
+
+    .wish-item:hover::after {
+      background-position: 200%;
+    }
+
+    .wish-item:hover {
+      transform: translateX(6px) scale(1.01);
+      box-shadow: 0 12px 50px rgba(192, 24, 74, 0.2),
+        0 0 30px rgba(255, 107, 157, 0.15);
+      border-color: rgba(255, 107, 157, 0.4);
+    }
+
+    .wish-icon {
+      font-size: 2rem;
+      min-width: 40px;
+      text-align: center;
+      animation: iconPulse 2s ease-in-out infinite;
+      flex-shrink: 0;
+    }
+
+    .wish-item:nth-child(1) .wish-icon {
+      animation-delay: 0.0s;
+    }
+
+    .wish-item:nth-child(2) .wish-icon {
+      animation-delay: 0.4s;
+    }
+
+    .wish-item:nth-child(3) .wish-icon {
+      animation-delay: 0.8s;
+    }
+
+    .wish-item:nth-child(4) .wish-icon {
+      animation-delay: 1.2s;
+    }
+
+    .wish-item:nth-child(5) .wish-icon {
+      animation-delay: 1.6s;
+    }
+
+    @keyframes iconPulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.15);
+      }
+    }
+
+    .wish-text {
+      font-family: var(--font-elegant);
+      font-size: clamp(1rem, 2.2vw, 1.2rem);
+      color: rgba(255, 220, 235, 0.92);
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    /* ── Shooting stars ───────────────────────────────────── */
+    .shoot-star {
+      position: fixed;
+      width: 150px;
+      height: 2px;
+      background: linear-gradient(to right, transparent, #ffd700, transparent);
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 1;
+      animation: shootAcross linear forwards;
+    }
+
+    @keyframes shootAcross {
+      0% {
+        opacity: 1;
+        transform: translateX(-200px) translateY(0) rotate(-30deg);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateX(200vw) translateY(100px) rotate(-30deg);
+      }
+    }
+
+    /* ── Bottom glow quote ────────────────────────────────── */
+    .final-line {
+      font-family: var(--font-script);
+      font-size: clamp(1.5rem, 4vw, 2.6rem);
+      color: var(--gold-soft);
+      text-align: center;
+      text-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+      opacity: 0;
+      transition: opacity 1s ease;
+      margin-top: 16px;
+    }
+
+    .final-line.visible {
+      opacity: 1;
+    }
+
+    @media (max-width: 600px) {
+      .wish-item {
+        padding: 20px 20px;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .wish-item::before {
+        left: 0;
+        top: 0;
+        bottom: auto;
+        width: 100%;
+        height: 3px;
+        border-radius: 3px 3px 0 0;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-romantic">
+
+  <canvas id="star-canvas" class="canvas-layer"></canvas>
+  <canvas id="particle-canvas" class="canvas-layer" style="z-index:1;"></canvas>
+  <div class="hearts-container"></div>
+  <div class="petals-container"></div>
+  <div id="page-transition"></div>
+  <button id="music-btn" class="music-btn">🎵</button>
+
+  <div class="nav-container">
+    <a class="nav-btn" onclick="navigateTo('special.html')">💗 Go Back</a>
+    <div class="page-dots">
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot active"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+    </div>
+    <a class="nav-btn" onclick="navigateTo('surprise.html')">Open Your Final Surprise 🎁</a>
+  </div>
+
+  <main class="wishes-page">
+    <h1 class="page-title fade-up">My Birthday Wishes For You ❤️</h1>
+
+    <div class="wishes-list">
+      <div class="wish-item" data-delay="100">
+        <span class="wish-icon">❤️</span>
+        <p class="wish-text">May you always have a reason to smile. ❤️</p>
+      </div>
+      <div class="wish-item" data-delay="250">
+        <span class="wish-icon">✨</span>
+        <p class="wish-text">May your dreams become reality. ✨</p>
+      </div>
+      <div class="wish-item" data-delay="400">
+        <span class="wish-icon">🌸</span>
+        <p class="wish-text">May you find happiness wherever life takes you. 🌸</p>
+      </div>
+      <div class="wish-item" data-delay="550">
+        <span class="wish-icon">💗</span>
+        <p class="wish-text">May you always be surrounded by people who truly care about you. 💗</p>
+      </div>
+      <div class="wish-item" data-delay="700">
+        <span class="wish-icon">📖</span>
+        <p class="wish-text">May this new year of your life become one of your most beautiful chapters. 📖✨</p>
+      </div>
+    </div>
+
+    <p class="final-line" id="final-line">
+      All of this and so much more... for you. ❤️
+    </p>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+  <script>
+    initParticleCanvas('particle-canvas');
+
+    // ── Starfield ─────────────────────────────────────────────
+    const starCanvas = document.getElementById('star-canvas');
+    const sCtx = starCanvas.getContext('2d');
+    let SW = starCanvas.width = window.innerWidth;
+    let SH = starCanvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      SW = starCanvas.width = window.innerWidth;
+      SH = starCanvas.height = window.innerHeight;
+    });
+
+    const stars = Array.from({ length: 180 }, () => ({
+      x: Math.random() * SW,
+      y: Math.random() * SH,
+      r: 0.3 + Math.random() * 1.5,
+      alpha: Math.random(),
+      dAlpha: (Math.random() - 0.5) * 0.015,
+    }));
+
+    function drawStars() {
+      sCtx.clearRect(0, 0, SW, SH);
+      stars.forEach(s => {
+        sCtx.beginPath();
+        sCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+        sCtx.fillStyle = `rgba(255,220,240,${Math.max(0.05, Math.min(1, s.alpha))})`;
+        sCtx.fill();
+        s.alpha += s.dAlpha;
+        if (s.alpha > 1 || s.alpha < 0.05) s.dAlpha *= -1;
+      });
+      requestAnimationFrame(drawStars);
+    }
+    drawStars();
+
+    // ── Shooting stars ─────────────────────────────────────────
+    function spawnShootingStar() {
+      const s = document.createElement('div');
+      s.className = 'shoot-star';
+      s.style.cssText = `
+        top:${5 + Math.random() * 40}%;
+        left:${-5}%;
+        animation-duration:${1.2 + Math.random() * 1}s;
+        animation-delay:${Math.random() * 0.5}s;
+        opacity:0;
+      `;
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 2500);
+    }
+
+    setInterval(spawnShootingStar, 2200);
+
+    // ── Staggered wish reveal ──────────────────────────────────
+    const wishes = document.querySelectorAll('.wish-item');
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          const delay = parseInt(e.target.dataset.delay || 0);
+          setTimeout(() => e.target.classList.add('visible'), delay);
+        }
+      });
+    }, { threshold: 0.2 });
+    wishes.forEach(w => obs.observe(w));
+
+    // Final line
+    setTimeout(() => {
+      const fl = document.getElementById('final-line');
+      const flObs = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+      }, { threshold: 0.3 });
+      flObs.observe(fl);
+    }, 500);
+  </script>
+</body>
+
+</html>

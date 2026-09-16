@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Message From My Heart 💗</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { overflow-x: hidden; }
+
+    /* ── Layout ───────────────────────────────────────────── */
+    .letter-page {
+      position: relative; z-index: 10;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: flex-start;
+      padding: 80px 20px 160px;
+      gap: 32px;
+    }
+
+    .page-title {
+      font-family: var(--font-script);
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      color: var(--pink-soft);
+      text-align: center;
+      text-shadow: 0 0 30px rgba(255,107,157,0.6);
+      margin-bottom: 8px;
+    }
+
+    /* ── Letter Card ──────────────────────────────────────── */
+    .letter-card {
+      max-width: 720px;
+      width: 100%;
+      padding: 48px 52px;
+      border-radius: 28px;
+      position: relative;
+      background: rgba(255,255,255,0.05);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,150,180,0.2);
+      box-shadow: 0 8px 48px rgba(192,24,74,0.12),
+                  0 0 80px rgba(124,58,237,0.07),
+                  inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+
+    /* Glowing heart behind card */
+    .letter-heart-glow {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      font-size: 18rem;
+      opacity: 0.04;
+      pointer-events: none;
+      user-select: none;
+      animation: heartbeat 2s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    /* ── Letter Paragraphs ────────────────────────────────── */
+    .letter-para {
+      font-family: var(--font-elegant);
+      font-size: clamp(1rem, 2.2vw, 1.25rem);
+      color: rgba(255,220,235,0.92);
+      line-height: 1.9;
+      text-align: center;
+      position: relative; z-index: 1;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+      margin-bottom: 20px;
+    }
+
+    .letter-para.italic { font-style: italic; }
+    .letter-para.bold   { font-weight: 600; color: var(--pink-soft); }
+    .letter-para.big    { font-size: clamp(1.1rem, 2.5vw, 1.45rem); }
+
+    .letter-para.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Signature */
+    .letter-sign {
+      font-family: var(--font-script);
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      color: var(--rose-light);
+      text-align: center;
+      margin-top: 24px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 1s ease 0.2s, transform 1s ease 0.2s;
+      position: relative; z-index: 1;
+      text-shadow: 0 0 20px rgba(255,107,157,0.6);
+    }
+
+    .letter-sign.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── Click-to-reveal progress ─────────────────────────── */
+    .reveal-hint {
+      font-size: 0.85rem;
+      color: rgba(255,200,220,0.6);
+      text-align: center;
+      animation: fadeInOut 2s ease-in-out infinite;
+      margin-top: -16px;
+    }
+
+    @keyframes fadeInOut {
+      0%,100% { opacity: 0.5; }
+      50%      { opacity: 1; }
+    }
+
+    .reveal-hint.hidden { opacity: 0; pointer-events: none; }
+
+    /* ── CTA area ─────────────────────────────────────────── */
+    .cta-row {
+      display: flex; gap: 16px;
+      flex-wrap: wrap; justify-content: center;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .letter-card { padding: 28px 22px; }
+    }
+  </style>
+</head>
+<body class="bg-romantic">
+
+  <canvas id="particle-canvas" class="canvas-layer"></canvas>
+  <div class="hearts-container"></div>
+  <div class="petals-container"></div>
+  <div id="page-transition"></div>
+  <button id="music-btn" class="music-btn" title="Play Music">🎵</button>
+
+  <div class="nav-container">
+    <a class="nav-btn" onclick="navigateTo('birthday.html')">💗 Go Back</a>
+    <div class="page-dots">
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot active"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+      <div class="page-dot"></div>
+    </div>
+    <a class="nav-btn" id="next-btn" style="display:none" onclick="navigateTo('memories.html')">See Our Memories 📸</a>
+  </div>
+
+  <main class="letter-page">
+    <h1 class="page-title fade-up">From My Heart To Yours ❤️</h1>
+
+    <p class="reveal-hint" id="reveal-hint">Tap anywhere to continue reading ✨</p>
+
+    <div class="letter-card fade-up" id="letter-card" onclick="revealNext()">
+      <div class="letter-heart-glow">❤️</div>
+
+      <p class="letter-para" data-para="0">
+        Having you as my sister is one of the most beautiful parts of my life.
+      </p>
+      <p class="letter-para" data-para="1">
+        We've shared laughter, silly fights, unforgettable moments,<br>
+        secrets, and countless memories.
+      </p>
+      <p class="letter-para italic" data-para="2">
+        Sometimes I may annoy you.<br>
+        Sometimes we may fight.<br>
+        Sometimes we may not agree.
+      </p>
+      <p class="letter-para" data-para="3">
+        But underneath all of that, there is something that will never change:
+      </p>
+      <p class="letter-para bold big" data-para="4">
+        You will always be my sister,<br>
+        and you will always have a special place in my heart. ❤️
+      </p>
+      <p class="letter-para" data-para="5">
+        I hope this birthday brings you happiness that stays,<br>
+        dreams that come true,<br>
+        and memories that you'll treasure forever.
+      </p>
+      <p class="letter-para bold" data-para="6">
+        Never forget how loved you are.
+      </p>
+
+      <p class="letter-sign" id="letter-sign">
+        Happy Birthday, Sis. ❤️
+      </p>
+    </div>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="script.js"></script>
+  <script>
+    initParticleCanvas('particle-canvas');
+
+    const paras = Array.from(document.querySelectorAll('.letter-para'));
+    const sign  = document.getElementById('letter-sign');
+    const hint  = document.getElementById('reveal-hint');
+    const nextBtn = document.getElementById('next-btn');
+    let current = 0;
+
+    // Show first para automatically
+    setTimeout(() => { if (paras[0]) { paras[0].classList.add('visible'); current = 1; }}, 600);
+
+    function revealNext() {
+      if (current < paras.length) {
+        paras[current].classList.add('visible');
+        createSparkle(window.innerWidth/2, window.innerHeight/2);
+        current++;
+      } else if (!sign.classList.contains('visible')) {
+        sign.classList.add('visible');
+        hint.classList.add('hidden');
+        burstHearts(window.innerWidth/2, window.innerHeight*0.5, 25);
+        setTimeout(() => { nextBtn.style.display = 'inline-flex'; }, 800);
+      }
+    }
+
+    // Also allow keyboard
+    document.addEventListener('keydown', (e) => {
+      if (['Space','ArrowRight','Enter'].includes(e.code)) revealNext();
+    });
+  </script>
+</body>
+</html>
