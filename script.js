@@ -1,9 +1,12 @@
 /* ============================================================
-   🎂 BIRTHDAY WEBSITE — SHARED JS
-   script.js — utilities available on every page
+   🎂 BIRTHDAY WEBSITE — SHARED JS  (Performance Edition)
    ============================================================ */
 
-// ── Apply config names everywhere ─────────────────────────
+// ── Detect mobile once ────────────────────────────────────────
+const IS_MOBILE = window.innerWidth <= 768 ||
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+// ── Apply config names everywhere ────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   const cfg = window.CONFIG || {};
   document.querySelectorAll('[data-name]').forEach(el => {
@@ -14,12 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   initMusic();
-  initTransitionOverlay();
+  initTransitionFadeIn();
+
+  // Fewer particles on mobile to avoid lag
   spawnFloatingHearts();
-  spawnPetals();
+  if (!IS_MOBILE) spawnPetals();
 });
 
-// ── Music ──────────────────────────────────────────────────
+// ── Music ─────────────────────────────────────────────────────
 let audio = null;
 let musicPlaying = false;
 
@@ -29,151 +34,150 @@ function initMusic() {
   if (!btn) return;
 
   const src = cfg.MUSIC_FILE || '';
-
   if (src) {
     audio = new Audio(src);
     audio.loop = true;
     audio.volume = 0.35;
   }
-
   btn.addEventListener('click', toggleMusic);
 }
 
 function toggleMusic() {
   const btn = document.getElementById('music-btn');
   if (!audio) {
-    btn.title = 'No music file set in config.js';
-    btn.style.opacity = '0.5';
+    btn.title = 'Add a music file in config.js → MUSIC_FILE';
     return;
   }
   if (musicPlaying) {
     audio.pause();
     musicPlaying = false;
     btn.classList.remove('playing');
-    btn.innerHTML = '🎵';
+    btn.textContent = '🎵';
   } else {
     audio.play().catch(() => {});
     musicPlaying = true;
     btn.classList.add('playing');
-    btn.innerHTML = '🎶';
+    btn.textContent = '🎶';
   }
 }
 
-// ── Page Transition ────────────────────────────────────────
-function initTransitionOverlay() {
-  const overlay = document.getElementById('page-transition');
-  if (!overlay) return;
-  // fade in on load
+// ── Page fade-in ──────────────────────────────────────────────
+function initTransitionFadeIn() {
   document.body.style.opacity = '0';
   requestAnimationFrame(() => {
-    document.body.style.transition = 'opacity 0.5s ease';
-    document.body.style.opacity = '1';
+    document.body.style.transition = 'opacity 0.45s ease';
+    document.body.style.opacity    = '1';
   });
 }
 
-function navigateTo(url, delay = 600) {
+// ── Navigate with fade ────────────────────────────────────────
+function navigateTo(url) {
   const overlay = document.getElementById('page-transition');
   if (overlay) {
     overlay.classList.add('transitioning');
-    // burst hearts
-    burstHearts(window.innerWidth / 2, window.innerHeight / 2, 30);
+    overlay.style.pointerEvents = 'all';
   }
-  setTimeout(() => { window.location.href = url; }, delay);
+  // Smaller burst on mobile
+  burstHearts(window.innerWidth / 2, window.innerHeight / 2, IS_MOBILE ? 10 : 22);
+  setTimeout(() => { window.location.href = url; }, 480);
 }
 
-// ── Floating Hearts (canvas) ───────────────────────────────
+// ── Floating Hearts ───────────────────────────────────────────
 function spawnFloatingHearts() {
   const container = document.querySelector('.hearts-container');
   if (!container) return;
-  const HEARTS = ['❤️','🩷','💕','💗','💖','💝','🌹','✨'];
-  const count = window.innerWidth < 600 ? 18 : 32;
+
+  const HEARTS = ['❤️','🩷','💕','💗','💖'];
+  // Far fewer on mobile
+  const count = IS_MOBILE ? 10 : 24;
 
   for (let i = 0; i < count; i++) {
     const h = document.createElement('span');
     h.className = 'heart-float';
     h.textContent = HEARTS[Math.floor(Math.random() * HEARTS.length)];
-    const size = 0.8 + Math.random() * 1.4;
+    const size = 0.8 + Math.random() * 1.2;
     h.style.cssText = `
-      left: ${Math.random() * 100}%;
-      bottom: -60px;
-      font-size: ${size}rem;
-      animation-duration: ${6 + Math.random() * 12}s;
-      animation-delay: ${Math.random() * 10}s;
+      left:${Math.random() * 100}%;
+      bottom:-50px;
+      font-size:${size}rem;
+      animation-duration:${8 + Math.random() * 14}s;
+      animation-delay:${Math.random() * 12}s;
     `;
     container.appendChild(h);
   }
 }
 
-// ── Rose Petals ────────────────────────────────────────────
+// ── Rose Petals (desktop only) ────────────────────────────────
 function spawnPetals() {
   const container = document.querySelector('.petals-container');
   if (!container) return;
+
   const PETALS = ['🌸','🌺','🌷','🌹'];
-  const count = window.innerWidth < 600 ? 8 : 14;
+  const count = 10;
 
   for (let i = 0; i < count; i++) {
     const p = document.createElement('span');
     p.className = 'petal';
     p.textContent = PETALS[Math.floor(Math.random() * PETALS.length)];
     p.style.cssText = `
-      left: ${Math.random() * 100}%;
-      font-size: ${0.7 + Math.random() * 0.9}rem;
-      animation-duration: ${8 + Math.random() * 12}s;
-      animation-delay: ${Math.random() * 10}s;
+      left:${Math.random() * 100}%;
+      font-size:${0.7 + Math.random() * 0.8}rem;
+      animation-duration:${10 + Math.random() * 12}s;
+      animation-delay:${Math.random() * 12}s;
     `;
     container.appendChild(p);
   }
 }
 
-// ── Burst Hearts (for button clicks) ─────────────────────
-function burstHearts(cx, cy, count = 20) {
-  const HEARTS = ['❤️','🩷','💖','💕','✨'];
+// ── Heart burst (click / transition) ─────────────────────────
+function burstHearts(cx, cy, count = 18) {
+  const HEARTS = ['❤️','🩷','💖','✨'];
   for (let i = 0; i < count; i++) {
     const h = document.createElement('span');
     h.style.cssText = `
-      position:fixed; left:${cx}px; top:${cy}px;
+      position:fixed;
+      left:${cx}px; top:${cy}px;
       pointer-events:none; z-index:9000;
-      font-size:${1 + Math.random()}rem;
-      transform:translate(-50%,-50%);
+      font-size:${0.9 + Math.random() * 0.9}rem;
+      will-change:transform,opacity;
     `;
     h.textContent = HEARTS[Math.floor(Math.random() * HEARTS.length)];
     document.body.appendChild(h);
 
     const angle = Math.random() * Math.PI * 2;
-    const dist  = 60 + Math.random() * 180;
+    const dist  = 50 + Math.random() * 150;
     const tx    = Math.cos(angle) * dist;
     const ty    = Math.sin(angle) * dist;
 
     h.animate([
-      { opacity: 1, transform: 'translate(-50%,-50%) scale(0.5)' },
-      { opacity: 0.9, transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty * 0.4}px)) scale(1.2)` },
-      { opacity: 0,   transform: `translate(calc(-50% + ${tx * 1.5}px), calc(-50% + ${ty}px)) scale(0.8)` },
-    ], { duration: 900 + Math.random() * 600, easing: 'ease-out' })
+      { opacity: 1,   transform: `translate(-50%,-50%) scale(0.5)` },
+      { opacity: 0.8, transform: `translate(calc(-50% + ${tx * 0.5}px), calc(-50% + ${ty * 0.4}px)) scale(1.1)` },
+      { opacity: 0,   transform: `translate(calc(-50% + ${tx}px), calc(-50% + ${ty}px)) scale(0.7)` },
+    ], { duration: 800 + Math.random() * 500, easing: 'ease-out' })
     .finished.then(() => h.remove());
   }
 }
 
-// ── Sparkles on click ─────────────────────────────────────
-document.addEventListener('click', (e) => {
-  if (e.target.closest('.btn-primary, .nav-btn, .music-btn, .memory-card, .photo-card')) return;
-  createSparkle(e.clientX, e.clientY);
-});
+// ── Sparkle on tap/click (skip on mobile to reduce jank) ─────
+if (!IS_MOBILE) {
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.btn-primary,.nav-btn,.music-btn')) return;
+    createSparkle(e.clientX, e.clientY);
+  });
+}
 
 function createSparkle(x, y) {
-  const SHAPES = ['✨','⭐','💫','🌟'];
+  const SHAPES = ['✨','💫','🌟'];
   const s = document.createElement('span');
   s.className = 'sparkle';
   s.textContent = SHAPES[Math.floor(Math.random() * SHAPES.length)];
-  s.style.cssText = `
-    left:${x}px; top:${y}px; font-size:1.2rem;
-    transform:translate(-50%,-50%);
-  `;
+  s.style.cssText = `left:${x}px; top:${y}px; font-size:1.1rem;`;
   document.body.appendChild(s);
-  setTimeout(() => s.remove(), 1500);
+  setTimeout(() => s.remove(), 1300);
 }
 
-// ── Typewriter helper ──────────────────────────────────────
-function typeWriter(element, text, speed = 40) {
+// ── Typewriter helper ─────────────────────────────────────────
+function typeWriter(element, text, speed = 45) {
   return new Promise(resolve => {
     element.textContent = '';
     let i = 0;
@@ -184,72 +188,103 @@ function typeWriter(element, text, speed = 40) {
   });
 }
 
-// ── Reveal animation helper ────────────────────────────────
+// ── IntersectionObserver reveal ───────────────────────────────
 function revealOnScroll() {
   const els = document.querySelectorAll('.fade-up');
-  const observer = new IntersectionObserver((entries) => {
+  if (!els.length) return;
+  const obs = new IntersectionObserver((entries) => {
     entries.forEach(e => {
-      if (e.isIntersecting) { e.target.classList.add('visible'); }
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        obs.unobserve(e.target); // fire only once
+      }
     });
-  }, { threshold: 0.15 });
-  els.forEach(el => observer.observe(el));
+  }, { threshold: 0.12 });
+  els.forEach(el => obs.observe(el));
 }
 document.addEventListener('DOMContentLoaded', revealOnScroll);
 
-// ── Particle Canvas ────────────────────────────────────────
+// ── Particle canvas (lightweight version on mobile) ───────────
 function initParticleCanvas(canvasId) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
+
+  // On mobile, skip canvas entirely — use CSS background instead
+  if (IS_MOBILE) {
+    canvas.style.display = 'none';
+    return;
+  }
+
   const ctx = canvas.getContext('2d');
-  let W = canvas.width = window.innerWidth;
+  let W = canvas.width  = window.innerWidth;
   let H = canvas.height = window.innerHeight;
 
+  let resizeTimeout;
   window.addEventListener('resize', () => {
-    W = canvas.width = window.innerWidth;
-    H = canvas.height = window.innerHeight;
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    }, 250);
   });
 
-  const particles = Array.from({ length: 120 }, () => ({
-    x: Math.random() * W,
-    y: Math.random() * H,
-    r: 0.5 + Math.random() * 1.5,
-    dx: (Math.random() - 0.5) * 0.3,
-    dy: -(0.1 + Math.random() * 0.4),
-    alpha: 0.2 + Math.random() * 0.6,
-    hue: 320 + Math.random() * 60,
+  // Fewer, bigger particles = cheaper to draw
+  const particles = Array.from({ length: 70 }, () => ({
+    x:     Math.random() * W,
+    y:     Math.random() * H,
+    r:     0.6 + Math.random() * 1.8,
+    dx:    (Math.random() - 0.5) * 0.25,
+    dy:    -(0.1 + Math.random() * 0.3),
+    alpha: 0.2 + Math.random() * 0.5,
+    hue:   320 + Math.random() * 60,
   }));
 
-  function draw() {
+  let running = true;
+  let lastTime = 0;
+  const FPS = 30; // cap at 30fps — enough for ambient particles
+  const INTERVAL = 1000 / FPS;
+
+  function draw(now) {
+    if (!running) return;
+    requestAnimationFrame(draw);
+    if (now - lastTime < INTERVAL) return;
+    lastTime = now;
+
     ctx.clearRect(0, 0, W, H);
     particles.forEach(p => {
       ctx.beginPath();
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, ${p.alpha})`;
+      ctx.fillStyle = `hsla(${p.hue},85%,72%,${p.alpha})`;
       ctx.fill();
-
       p.x += p.dx;
       p.y += p.dy;
-
-      if (p.y < -10) { p.y = H + 10; p.x = Math.random() * W; }
+      if (p.y < -8)  { p.y = H + 8; p.x = Math.random() * W; }
       if (p.x < 0 || p.x > W) p.dx *= -1;
     });
-    requestAnimationFrame(draw);
   }
-  draw();
+
+  // Pause when tab not visible
+  document.addEventListener('visibilitychange', () => {
+    running = !document.hidden;
+    if (running) requestAnimationFrame(draw);
+  });
+
+  requestAnimationFrame(draw);
 }
 
-// ── Fireworks ─────────────────────────────────────────────
+// ── Fireworks (capped on mobile) ─────────────────────────────
 function launchFirework(canvas) {
+  if (IS_MOBILE) return; // skip fireworks on mobile
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
-  const x = 100 + Math.random() * (W - 200);
-  const y = 80 + Math.random() * (H * 0.4);
+  const x = 80 + Math.random() * (W - 160);
+  const y = 60 + Math.random() * (H * 0.4);
   const hue = Math.random() * 360;
-  const count = 40 + Math.floor(Math.random() * 30);
+  const count = 30 + Math.floor(Math.random() * 20);
 
   const sparks = Array.from({ length: count }, () => {
     const angle = Math.random() * Math.PI * 2;
-    const speed = 2 + Math.random() * 5;
+    const speed = 2 + Math.random() * 4;
     return {
       x, y,
       vx: Math.cos(angle) * speed,
@@ -261,46 +296,51 @@ function launchFirework(canvas) {
   });
 
   let frame = 0;
-  function animateSparks() {
+  function step() {
     sparks.forEach(s => {
       ctx.beginPath();
       ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
       ctx.fillStyle = `hsla(${s.hue},100%,60%,${s.alpha})`;
       ctx.fill();
-      s.x += s.vx;
-      s.y += s.vy;
-      s.vy += 0.08;
-      s.alpha -= 0.018;
-      s.size *= 0.99;
+      s.x += s.vx; s.y += s.vy;
+      s.vy += 0.09;
+      s.alpha -= 0.022;
+      s.size  *= 0.99;
     });
-    frame++;
-    if (frame < 80 && sparks.some(s => s.alpha > 0)) requestAnimationFrame(animateSparks);
+    if (++frame < 70 && sparks.some(s => s.alpha > 0)) requestAnimationFrame(step);
   }
-  animateSparks();
+  step();
 }
 
-// ── Confetti ───────────────────────────────────────────────
-function launchConfetti(count = 80) {
+// ── Confetti ──────────────────────────────────────────────────
+function launchConfetti(count = 60) {
+  // Halve on mobile
+  const n = IS_MOBILE ? Math.floor(count / 2) : count;
   const COLORS = ['#ff6b9d','#ffd700','#c0184a','#7c3aed','#ff88b8','#fff'];
-  for (let i = 0; i < count; i++) {
+
+  for (let i = 0; i < n; i++) {
     const c = document.createElement('div');
     const color = COLORS[Math.floor(Math.random() * COLORS.length)];
     c.style.cssText = `
       position:fixed;
-      top:${20 + Math.random() * 20}%;
+      top:${15 + Math.random() * 20}%;
       left:${Math.random() * 100}%;
-      width:${4 + Math.random() * 6}px;
-      height:${4 + Math.random() * 6}px;
+      width:${4 + Math.random() * 5}px;
+      height:${4 + Math.random() * 5}px;
       background:${color};
       border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
       z-index:8000;
       pointer-events:none;
+      will-change:transform,opacity;
     `;
     document.body.appendChild(c);
     c.animate([
       { transform: `translate(0,0) rotate(0deg)`, opacity: 1 },
-      { transform: `translate(${(Math.random()-0.5)*200}px, ${200 + Math.random()*400}px) rotate(${Math.random()*720}deg)`, opacity: 0 },
-    ], { duration: 1200 + Math.random() * 1000, delay: Math.random() * 400, easing: 'ease-out' })
-    .finished.then(() => c.remove());
+      { transform: `translate(${(Math.random()-0.5)*160}px, ${180 + Math.random()*320}px) rotate(${Math.random()*720}deg)`, opacity: 0 },
+    ], {
+      duration: 1000 + Math.random() * 900,
+      delay: Math.random() * 350,
+      easing: 'ease-out',
+    }).finished.then(() => c.remove());
   }
 }
